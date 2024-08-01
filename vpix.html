@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive VR with Leaflet and A-Frame</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <style>
+        #map {
+            height: 100vh;
+        }
+
+        #vr-scene {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+        }
+
+        #close-vr {
+            display: none;
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 10000;
+            background: red;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .zoom-button {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #zoom-in {
+            top: 50px;
+            right: 10px;
+        }
+
+        #zoom-out {
+            top: 90px;
+            right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <a-scene id="vr-scene" embedded>
+        <a-sky id="vr-image" rotation="0 -90 0" zoom-listener></a-sky>
+        <a-entity camera position="0 1.6 0" look-controls></a-entity>
+        <!-- Navigation Controls -->
+        <a-entity id="nav-left" geometry="primitive: plane; height: 1; width: 1" material="color: #FF0000"
+            position="-1.5 1.6 -3" text="value: Prev; align: center" class="clickable"></a-entity>
+        <a-entity id="nav-right" geometry="primitive: plane; height: 1; width: 1" material="color: #00FF00"
+            position="1.5 1.6 -3" text="value: Next; align: center" class="clickable"></a-entity>
+    </a-scene>
+    <div id="close-vr">Close</div>
+    <div id="zoom-in" class="zoom-button">Zoom In</div>
+    <div id="zoom-out" class="zoom-button">Zoom Out</div>
+
+    <script>
+        // Initialize the Leaflet map
+        var map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Define markers with their coordinates and image URLs for VR
+        var markers = [
+            { coords: [51.5, -0.09], images: ['53891924037_72a1e0b35c_6k.jpg', 'https://example.com/image2.jpg'] },
+            { coords: [48.8566, 2.3522], images: ['53893444295_7c58338321_6k.jpg', '53893444295_7c58338321_6k.jpg'] },
+            { coords: [40.7128, -74.0060], images: ['53893444305_489f2f0728_6k.jpg', '53893444305_489f2f0728_6k.jpg'] }
+        ];
+
+        var currentImageIndex = 0;
+        var currentImages = [];
+
+        // Function to update the VR image
+        function updateVRImage() {
+            document.getElementById('vr-image').setAttribute('src', currentImages[currentImageIndex]);
+        }
+
+        // Event listeners for navigation controls
+        document.getElementById('nav-left').addEventListener('click', function () {
+            currentImageIndex = (currentImageIndex - 1 + currentImages.length) % currentImages.length;
+            updateVRImage();
+        });
+
+        document.getElementById('nav-right').addEventListener('click', function () {
+            currentImageIndex = (currentImageIndex + 1) % currentImages.length;
+            updateVRImage();
+        });
+
+        // Add markers to the map
+        markers.forEach(marker => {
+            var leafletMarker = L.marker(marker.coords).addTo(map);
+            leafletMarker.on('click', function () {
+                currentImages = marker.images;
+                currentImageIndex = 0;
+                updateVRImage();
+                document.getElementById('vr-scene').style.display = 'block';
+                document.getElementById('close-vr').style.display = 'block';
+                document.getElementById('zoom-in').style.display = 'block';
+                document.getElementById('zoom-out').style.display = 'block';
+            });
+        });
+
+        // Hide VR scene on close button click
+        document.getElementById('close-vr').addEventListener('click', function () {
+            document.getElementById('vr-scene').style.display = 'none';
+            document.getElementById('close-vr').style.display = 'none';
+            document.getElementById('zoom-in').style.display = 'none';
+            document.getElementById('zoom-out').style.display = 'none';
+        });
+
+        // Ensure interactions are recognized
+        document.querySelectorAll('.clickable').forEach(item => {
+            item.setAttribute('cursor-listener', '');
+        });
+
+        // A-Frame cursor listener component
+        AFRAME.registerComponent('cursor-listener', {
+            init: function () {
+                this.el.addEventListener('click', function (evt) {
+                    console.log('Cursor clicked');
+                });
+            }
+        });
+
+        // Zoom in and zoom out functionality
+        var zoomLevel = 1;
+        document.getElementById('zoom-in').addEventListener('click', function () {
+            zoomLevel *= 1.2;
+            document.getElementById('vr-image').setAttribute('scale', { x: zoomLevel, y: zoomLevel, z: zoomLevel });
+        });
+        document.getElementById('zoom-out').addEventListener('click', function () {
+            zoomLevel /= 1.2;
+            document.getElementById('vr-image').setAttribute('scale', { x: zoomLevel, y: zoomLevel, z: zoomLevel });
+        });
+    </script>
+</body>
+
+</html>
