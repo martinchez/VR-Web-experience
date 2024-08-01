@@ -1,0 +1,97 @@
+< !DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Interactive VR with Leaflet and A-Frame</title>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+        <script src="https://raw.githack.com/jeromeetienne/AR.js/master/aframe/build/aframe-ar.js"></script>
+        <style>
+            #map {
+                height: 100vh;
+            }
+
+            #vr-scene {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="map"></div>
+        <a-scene id="vr-scene" embedded arjs>
+            <a-sky id="vr-image" rotation="0 -90 0"></a-sky>
+            <a-entity camera position="0 1.6 0"></a-entity>
+            <!-- Navigation Controls -->
+            <a-entity id="nav-left" geometry="primitive: plane; height: 1; width: 1" material="color: #FF0000"
+                position="-1.5 1.6 -3" text="value: Prev; align: center"></a-entity>
+            <a-entity id="nav-right" geometry="primitive: plane; height: 1; width: 1" material="color: #00FF00"
+                position="1.5 1.6 -3" text="value: Next; align: center"></a-entity>
+        </a-scene>
+
+        <script>
+            // Initialize the Leaflet map
+            var lat = -0.4085872589085227
+            var lon = 36.97111797475605
+            var map = L.map('map').setView([lat, lon], 10)
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // defining the markers
+
+            var markers = [
+                { coords: [lat, lon], image: '53891924037_72a1e0b35c_6k.jpg' },
+                { coords: [-0.40700049314507475, 36.96357949092048], image: 'https://example.com/image2.jpg' },
+                { coords: [-0.4055009298066814, 36.94718497406759], image: 'https://example.com/image3.jpg' }
+            ];
+
+            var currentImageIndex = 0;
+            var currentImages = [];
+
+            // Function to update the VR image
+            function updateVRImage() {
+                document.getElementById('vr-image').setAttribute('src', currentImages[currentImageIndex]);
+            }
+
+            // Event listeners for navigation controls
+            document.getElementById('nav-left').addEventListener('click', function () {
+                currentImageIndex = (currentImageIndex - 1 + currentImages.length) % currentImages.length;
+                updateVRImage();
+            });
+
+            document.getElementById('nav-right').addEventListener('click', function () {
+                currentImageIndex = (currentImageIndex + 1) % currentImages.length;
+                updateVRImage();
+            });
+
+            // Add markers to the map
+            markers.forEach(marker => {
+                var leafletMarker = L.marker(marker.coords).addTo(map);
+                leafletMarker.on('click', function () {
+                    currentImages = marker.images;
+                    currentImageIndex = 0;
+                    updateVRImage();
+                    document.getElementById('vr-scene').style.display = 'block';
+                });
+            });
+
+            // Hide VR scene on escape key press
+            window.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    document.getElementById('vr-scene').style.display = 'none';
+                }
+            });
+        </script>
+    </body>
+
+    </html>
