@@ -10,9 +10,23 @@
 
 <body>
     <a-scene>
+        <a-assets>
+            <img id="city" crossorigin="anonymous" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/city.jpg">
+            <img id="city-thumb" crossorigin="anonymous"
+                src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/thumb-city.jpg">
+            <img id="cubes-thumb" crossorigin="anonymous"
+                src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/thumb-cubes.jpg">
+            <img id="sechelt-thumb" crossorigin="anonymous"
+                src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/thumb-sechelt.jpg">
+            <audio id="click-sound" crossorigin="anonymous"
+                src="https://cdn.aframe.io/360-image-gallery-boilerplate/audio/click.ogg"></audio>
+            <img id="cubes" crossorigin="anonymous" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/cubes.jpg">
+            <img id="sechelt" crossorigin="anonymous" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg">
+        
+        </a-assets>
         <a-sky src="/53891924037_72a1e0b35c_6k.jpg" rotation="0 -130 0"></a-sky>
         <a-text font="poppins" value="Plant Oxford, Home of the Mini, Cowley." width="6" position="-2.5 0.35 -1.5" rotation="0 20 0"></a-text>
-        
+
         <!-- adding camera and cusor -->
         <a-entity camera look-controls>
             <a-cursor id="cursor" animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
