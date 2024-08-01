@@ -74,83 +74,85 @@
 
     <script>
         // Initialize the Leaflet map
-        var map = L.map('map').setView([0, 0], 2);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+var map = L.map('map').setView([0, 0], 2);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
 
-        // Define markers with their coordinates and image URLs for VR
-        var markers = [
-            { coords: [51.5, -0.09], images: ['53891924037_72a1e0b35c_6k.jpg', 'https://example.com/image2.jpg'] },
-            { coords: [48.8566, 2.3522], images: ['53893444295_7c58338321_6k.jpg', '53893444295_7c58338321_6k.jpg'] },
-            { coords: [40.7128, -74.0060], images: ['53893444305_489f2f0728_6k.jpg', '53893444305_489f2f0728_6k.jpg'] }
-        ];
+// Define markers with their coordinates and image URLs for VR
+var markers = [
+    { coords: [51.5, -0.09], images: ['53891924037_72a1e0b35c_6k.jpg', 'https://example.com/image2.jpg'] },
+    { coords: [48.8566, 2.3522], images: ['53893444295_7c58338321_6k.jpg', '53893444295_7c58338321_6k.jpg'] },
+    { coords: [40.7128, -74.0060], images: ['53893444305_489f2f0728_6k.jpg', '53893444305_489f2f0728_6k.jpg'] }
+];
 
-        var currentImageIndex = 0;
-        var currentImages = [];
+var currentMarkerIndex = 0;
+var currentImageIndex = 0;
 
-        // Function to update the VR image
-        function updateVRImage() {
-            document.getElementById('vr-image').setAttribute('src', currentImages[currentImageIndex]);
-        }
+// Function to update the VR image based on the current marker
+function updateVRImage() {
+    var marker = markers[currentMarkerIndex];
+    currentImageIndex = 0; // Reset to the first image of the current marker
+    document.getElementById('vr-image').setAttribute('src', marker.images[currentImageIndex]);
+}
 
-        // Event listeners for navigation controls
-        document.getElementById('nav-left').addEventListener('click', function () {
-            currentImageIndex = (currentImageIndex - 1 + currentImages.length) % currentImages.length;
-            updateVRImage();
+// Event listeners for navigation controls
+document.getElementById('nav-left').addEventListener('click', function() {
+    currentMarkerIndex = (currentMarkerIndex - 1 + markers.length) % markers.length;
+    updateVRImage();
+});
+
+document.getElementById('nav-right').addEventListener('click', function() {
+    currentMarkerIndex = (currentMarkerIndex + 1) % markers.length;
+    updateVRImage();
+});
+
+// Add markers to the map
+markers.forEach((marker, index) => {
+    var leafletMarker = L.marker(marker.coords).addTo(map);
+    leafletMarker.on('click', function() {
+        currentMarkerIndex = index;
+        updateVRImage();
+        document.getElementById('vr-scene').style.display = 'block';
+        document.getElementById('close-vr').style.display = 'block';
+        document.getElementById('zoom-in').style.display = 'block';
+        document.getElementById('zoom-out').style.display = 'block';
+    });
+});
+
+// Hide VR scene on close button click
+document.getElementById('close-vr').addEventListener('click', function() {
+    document.getElementById('vr-scene').style.display = 'none';
+    document.getElementById('close-vr').style.display = 'none';
+    document.getElementById('zoom-in').style.display = 'none';
+    document.getElementById('zoom-out').style.display = 'none';
+});
+
+// Ensure interactions are recognized
+document.querySelectorAll('.clickable').forEach(item => {
+    item.setAttribute('cursor-listener', '');
+});
+
+// A-Frame cursor listener component
+AFRAME.registerComponent('cursor-listener', {
+    init: function () {
+        this.el.addEventListener('click', function (evt) {
+            console.log('Cursor clicked');
         });
+    }
+});
 
-        document.getElementById('nav-right').addEventListener('click', function () {
-            currentImageIndex = (currentImageIndex + 1) % currentImages.length;
-            updateVRImage();
-        });
+// Zoom in and zoom out functionality
+var zoomLevel = 1;
+document.getElementById('zoom-in').addEventListener('click', function() {
+    zoomLevel *= 1.2;
+    document.getElementById('vr-image').setAttribute('scale', {x: zoomLevel, y: zoomLevel, z: zoomLevel});
+});
+document.getElementById('zoom-out').addEventListener('click', function() {
+    zoomLevel /= 1.2;
+    document.getElementById('vr-image').setAttribute('scale', {x: zoomLevel, y: zoomLevel, z: zoomLevel});
+});
 
-        // Add markers to the map
-        markers.forEach(marker => {
-            var leafletMarker = L.marker(marker.coords).addTo(map);
-            leafletMarker.on('click', function () {
-                currentImages = marker.images;
-                currentImageIndex = 0;
-                updateVRImage();
-                document.getElementById('vr-scene').style.display = 'block';
-                document.getElementById('close-vr').style.display = 'block';
-                document.getElementById('zoom-in').style.display = 'block';
-                document.getElementById('zoom-out').style.display = 'block';
-            });
-        });
-
-        // Hide VR scene on close button click
-        document.getElementById('close-vr').addEventListener('click', function () {
-            document.getElementById('vr-scene').style.display = 'none';
-            document.getElementById('close-vr').style.display = 'none';
-            document.getElementById('zoom-in').style.display = 'none';
-            document.getElementById('zoom-out').style.display = 'none';
-        });
-
-        // Ensure interactions are recognized
-        document.querySelectorAll('.clickable').forEach(item => {
-            item.setAttribute('cursor-listener', '');
-        });
-
-        // A-Frame cursor listener component
-        AFRAME.registerComponent('cursor-listener', {
-            init: function () {
-                this.el.addEventListener('click', function (evt) {
-                    console.log('Cursor clicked');
-                });
-            }
-        });
-
-        // Zoom in and zoom out functionality
-        var zoomLevel = 1;
-        document.getElementById('zoom-in').addEventListener('click', function () {
-            zoomLevel *= 1.2;
-            document.getElementById('vr-image').setAttribute('scale', { x: zoomLevel, y: zoomLevel, z: zoomLevel });
-        });
-        document.getElementById('zoom-out').addEventListener('click', function () {
-            zoomLevel /= 1.2;
-            document.getElementById('vr-image').setAttribute('scale', { x: zoomLevel, y: zoomLevel, z: zoomLevel });
-        });
     </script>
 </body>
 
