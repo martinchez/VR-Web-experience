@@ -12,6 +12,14 @@
     <a-scene>
         <a-sky src="/53891924037_72a1e0b35c_6k.jpg" rotation="0 -130 0"></a-sky>
         <a-text font="poppins" value="Plant Oxford, Home of the Mini, Cowley." width="6" position="-2.5 0.35 -1.5" rotation="0 20 0"></a-text>
+        
+        <!-- adding camera and cusor -->
+        <a-entity camera look-controls>
+            <a-cursor id="cursor" animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
+                animation__fusing="property: fusing; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
+                event-set__mouseenter="_event: mouseenter; color: springgreen"
+                event-set__mouseleave="_event: mouseleave; color: black" raycaster="objects: .link"></a-cursor>
+        </a-entity>
     </a-scene>
 </body>
 
